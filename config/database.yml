@@ -1,0 +1,19 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 12
+
+development:
+  <<: *default
+  database: asset_manager_development
+  url: <%= ENV["DATABASE_URL"]%>
+
+test:
+  <<: *default
+  database: asset_manager_test
+  url: <%= ENV["TEST_DATABASE_URL"] %>
+
+production:
+  <<: *default
+  database: asset_manager
+  url: <%= ENV["DATABASE_URL"]%>

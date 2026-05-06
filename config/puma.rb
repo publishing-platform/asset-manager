@@ -1,0 +1,2 @@
+require "publishing_platform_app_config/publishing_platform_puma"
+PublishingPlatformPuma.configure_rails(self)
