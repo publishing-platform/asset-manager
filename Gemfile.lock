@@ -85,6 +85,13 @@ GEM
     brakeman (8.0.4)
       racc
     builder (3.3.0)
+    carrierwave (3.1.2)
+      activemodel (>= 6.0.0)
+      activesupport (>= 6.0.0)
+      addressable (~> 2.6)
+      image_processing (~> 1.1)
+      marcel (~> 1.0.0)
+      ssrf_filter (~> 1.0)
     concurrent-ruby (1.3.6)
     connection_pool (3.0.2)
     crack (1.0.1)
@@ -111,6 +118,14 @@ GEM
       logger
     faraday-net_http (3.4.2)
       net-http (~> 0.5)
+    ffi (1.17.4-aarch64-linux-gnu)
+    ffi (1.17.4-aarch64-linux-musl)
+    ffi (1.17.4-arm-linux-gnu)
+    ffi (1.17.4-arm-linux-musl)
+    ffi (1.17.4-arm64-darwin)
+    ffi (1.17.4-x86_64-darwin)
+    ffi (1.17.4-x86_64-linux-gnu)
+    ffi (1.17.4-x86_64-linux-musl)
     globalid (1.3.0)
       activesupport (>= 6.1)
     hashdiff (1.2.1)
@@ -118,6 +133,9 @@ GEM
       logger
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
+    image_processing (1.14.0)
+      mini_magick (>= 4.9.5, < 6)
+      ruby-vips (>= 2.0.17, < 3)
     io-console (0.8.2)
     irb (1.18.0)
       pp (>= 0.6.0)
@@ -139,7 +157,9 @@ GEM
       net-imap
       net-pop
       net-smtp
-    marcel (1.1.0)
+    marcel (1.0.4)
+    mini_magick (5.3.1)
+      logger
     mini_mime (1.1.5)
     minitest (6.0.6)
       drb (~> 2.0)
@@ -332,6 +352,9 @@ GEM
       lint_roller (~> 1.1)
       rubocop (~> 1.81)
     ruby-progressbar (1.13.0)
+    ruby-vips (2.3.0)
+      ffi (~> 1.12)
+      logger
     securerandom (0.4.1)
     sentry-rails (5.28.1)
       railties (>= 5.0)
@@ -348,6 +371,7 @@ GEM
     snaky_hash (2.0.3)
       hashie (>= 0.1.0, < 6)
       version_gem (>= 1.1.8, < 3)
+    ssrf_filter (1.5.0)
     state_machines (0.101.0)
     state_machines-activemodel (0.102.0)
       activemodel (>= 7.2)
@@ -395,6 +419,7 @@ PLATFORMS
 DEPENDENCIES
   bootsnap
   brakeman
+  carrierwave (~> 3.0)
   debug
   factory_bot_rails
   pg (~> 1.1)
