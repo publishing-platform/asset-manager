@@ -100,6 +100,11 @@ GEM
     drb (2.2.3)
     erb (6.0.4)
     erubi (1.13.1)
+    factory_bot (6.6.0)
+      activesupport (>= 6.1.0)
+    factory_bot_rails (6.5.1)
+      factory_bot (~> 6.5)
+      railties (>= 6.1.0)
     faraday (2.14.1)
       faraday-net_http (>= 2.0, < 3.5)
       json
@@ -384,6 +389,7 @@ DEPENDENCIES
   bootsnap
   brakeman
   debug
+  factory_bot_rails
   pg (~> 1.1)
   publishing_platform_app_config
   publishing_platform_rubocop
