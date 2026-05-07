@@ -10,9 +10,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_06_185050) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_07_134559) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "assets", force: :cascade do |t|
+    t.jsonb "auth_bypass_ids", default: [], null: false
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.datetime "deleted_at", precision: nil
+    t.boolean "draft", default: false, null: false
+    t.string "etag"
+    t.jsonb "filename_history", default: [], null: false
+    t.datetime "last_modified", precision: nil
+    t.string "md5_hexdigest"
+    t.string "parent_document_url"
+    t.string "redirect_url"
+    t.bigint "replaced_by_id"
+    t.integer "size"
+    t.string "state", default: "unscanned", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
+    t.index ["deleted_at"], name: "index_assets_on_deleted_at"
+    t.index ["replaced_by_id"], name: "index_assets_on_replaced_by_id"
+    t.index ["uuid"], name: "index_assets_on_uuid", unique: true
+  end
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -25,4 +47,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_06_185050) do
     t.string "uid"
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "assets", "assets", column: "replaced_by_id", on_delete: :restrict
 end
