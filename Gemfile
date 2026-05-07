@@ -4,6 +4,7 @@ gem "rails", "~> 8.1.3"
 
 gem "pg", "~> 1.1"
 gem "publishing_platform_app_config"
+gem "state_machines-activerecord"
 gem "tzinfo-data", platforms: %i[windows jruby]
 
 gem "bootsnap", require: false
