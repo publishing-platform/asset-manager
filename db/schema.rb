@@ -21,6 +21,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_134559) do
     t.datetime "deleted_at", precision: nil
     t.boolean "draft", default: false, null: false
     t.string "etag"
+    t.string "file"
     t.jsonb "filename_history", default: [], null: false
     t.datetime "last_modified", precision: nil
     t.string "md5_hexdigest"

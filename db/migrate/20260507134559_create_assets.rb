@@ -4,6 +4,7 @@ class CreateAssets < ActiveRecord::Migration[8.1]
       t.uuid :uuid, null: false
       t.datetime :deleted_at, precision: nil
       t.string :state, null: false, default: "unscanned"
+      t.string :file
       t.jsonb :filename_history, null: false, default: []
       t.boolean :draft, default: false, null: false
       t.string :redirect_url

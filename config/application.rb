@@ -41,4 +41,6 @@ module AssetManager
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
   end
+
+  mattr_accessor :carrier_wave_store_base_dir
 end
