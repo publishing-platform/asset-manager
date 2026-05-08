@@ -43,4 +43,6 @@ module AssetManager
   end
 
   mattr_accessor :carrier_wave_store_base_dir
+
+  mattr_accessor :default_content_type
 end

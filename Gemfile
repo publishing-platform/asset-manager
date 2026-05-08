@@ -5,6 +5,8 @@ gem "rails", "~> 8.1.3"
 gem "carrierwave", "~> 3.0"
 gem "pg", "~> 1.1"
 gem "publishing_platform_app_config"
+gem "publishing_platform_sidekiq"
+gem "sidekiq-unique-jobs", "< 8.1.1"
 gem "state_machines-activerecord"
 gem "tzinfo-data", platforms: %i[windows jruby]
 
