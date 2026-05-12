@@ -824,6 +824,199 @@ RSpec.describe Asset, type: :model do
     end
   end
 
+  describe "#etag_from_file" do
+    let(:asset) { described_class.new }
+
+    let(:size) { 1024 }
+    let(:mtime) { Time.zone.parse("2017-01-01") }
+    let(:stat) { instance_double(File::Stat, size:, mtime:) }
+
+    before do
+      asset.file = load_fixture_file("asset.png")
+      allow(File).to receive(:stat).and_return(stat)
+    end
+
+    it "returns string made up of 2 parts separated by a hyphen" do
+      parts = asset.etag_from_file.split("-")
+      expect(parts.length).to eq(2)
+    end
+
+    it "has 1st part as file mtime (unix time in seconds written in lowercase hex)" do
+      last_modified_hex = asset.etag_from_file.split("-").first
+      last_modified = last_modified_hex.to_i(16)
+      expect(last_modified).to eq(mtime.to_i)
+    end
+
+    it "has 2nd part as file size (number of bytes written in lowercase hex)" do
+      size_hex = asset.etag_from_file.split("-").last
+      asset_size = size_hex.to_i(16)
+      expect(asset_size).to eq(size)
+    end
+
+    context "when the file has been deleted" do
+      before do
+        asset.file = nil
+        allow(File).to receive(:exist?).and_return(false)
+      end
+
+      it "returns nil" do
+        expect(asset.etag_from_file).to be_nil
+      end
+    end
+  end
+
+  describe "#etag" do
+    let(:asset) { described_class.new(file: load_fixture_file("asset.png"), etag:) }
+
+    before do
+      allow(asset).to receive(:etag_from_file).and_return("etag-from-file")
+    end
+
+    context "when asset is created" do
+      let(:etag) { nil }
+
+      before do
+        asset.save!
+      end
+
+      it "stores the value generated from the file in the database" do
+        expect(asset.reload.etag).to eq("etag-from-file")
+      end
+
+      context "when asset is updated with new file" do
+        let(:new_file) { load_fixture_file("asset2.jpg") }
+
+        before do
+          allow(asset).to receive(:etag_from_file).and_return("etag-from-new-file")
+          asset.update!(file: new_file)
+        end
+
+        it "stores the value generated from the new file in the database" do
+          expect(asset.reload.etag).to eq("etag-from-new-file")
+        end
+      end
+    end
+  end
+
+  describe "#last_modified_from_file" do
+    let(:asset) { described_class.new }
+
+    let(:mtime) { Time.zone.parse("2017-01-01") }
+    let(:stat) { instance_double(File::Stat, mtime:) }
+
+    before do
+      asset.file = load_fixture_file("asset.png")
+      allow(File).to receive(:stat).and_return(stat)
+    end
+
+    it "returns time file was last modified" do
+      expect(asset.last_modified_from_file).to eq(mtime)
+    end
+
+    context "when the file has been deleted" do
+      before do
+        asset.file = nil
+        allow(File).to receive(:exist?).and_return(false)
+      end
+
+      it "returns nil" do
+        expect(asset.last_modified_from_file).to be_nil
+      end
+    end
+  end
+
+  describe "#last_modified" do
+    let(:asset) { described_class.new(file: load_fixture_file("asset.png"), last_modified:) }
+
+    let(:time) { Time.zone.parse("2002-02-02 02:02") }
+    let(:time_from_file) { Time.zone.parse("2001-01-01 01:01") }
+
+    before do
+      allow(asset).to receive(:last_modified_from_file).and_return(time_from_file)
+    end
+
+    context "when asset is created" do
+      let(:last_modified) { nil }
+
+      before do
+        asset.save!
+      end
+
+      it "stores the value generated from the file in the database" do
+        expect(asset.reload.last_modified).to eq(time_from_file)
+      end
+
+      context "when asset is updated with new file" do
+        let(:new_file) { load_fixture_file("asset2.jpg") }
+        let(:time_from_new_file) { Time.zone.parse("2003-03-03 03:03") }
+
+        before do
+          allow(asset).to receive(:last_modified_from_file).and_return(time_from_new_file)
+          asset.update!(file: new_file)
+        end
+
+        it "stores the value generated from the new file in the database" do
+          expect(asset.reload.last_modified).to eq(time_from_new_file)
+        end
+      end
+    end
+  end
+
+  describe "#size_from_file" do
+    let(:asset) { described_class.new(file: load_fixture_file("asset.png")) }
+    let(:size) { 57_705 }
+
+    it "returns the size of the file" do
+      expect(asset.size_from_file).to eq(size)
+    end
+
+    context "when the file has been deleted" do
+      before do
+        asset.file = nil
+        allow(File).to receive(:exist?).and_return(false)
+      end
+
+      it "returns nil" do
+        expect(asset.size_from_file).to be_nil
+      end
+    end
+  end
+
+  describe "#size" do
+    let(:asset) { described_class.new(file: load_fixture_file("asset.png"), size:) }
+    let(:asset_size) { 100 }
+
+    before do
+      allow(asset).to receive(:size).and_return(asset_size)
+    end
+
+    context "when asset is created" do
+      let(:size) { nil }
+
+      before do
+        asset.save!
+      end
+
+      it "stores the value generated from the file in the database" do
+        expect(asset.reload.size).to eq(asset_size)
+      end
+
+      context "when asset is updated with new file" do
+        let(:new_file) { load_fixture_file("asset2.jpg") }
+        let(:new_asset_size) { 200 }
+
+        before do
+          allow(asset).to receive(:size).and_return(new_asset_size)
+          asset.update!(file: new_file)
+        end
+
+        it "stores the value generated from the new file in the database" do
+          expect(asset.reload.size).to eq(new_asset_size)
+        end
+      end
+    end
+  end
+
   describe "#md5_hexdigest_from_file" do
     let(:asset) { described_class.new(file: load_fixture_file("asset.png")) }
     let(:md5_hexdigest) { "a0d8aa55f6db670e38a14962c0652776" }
@@ -874,6 +1067,127 @@ RSpec.describe Asset, type: :model do
           expect(asset.reload.md5_hexdigest).to eq("md5-from-new-file")
         end
       end
+    end
+  end
+
+  describe "#upload_success!" do
+    context "when asset is unscanned" do
+      let(:asset) { create(:asset) }
+
+      it "does not allow asset state change to uploaded" do
+        expect { asset.upload_success! }
+          .to raise_error(StateMachines::InvalidTransition)
+      end
+    end
+
+    context "when asset is clean" do
+      let(:asset) { create(:clean_asset) }
+      let(:path) { asset.file.path }
+
+      it "changes asset state to uploaded" do
+        asset.upload_success!
+
+        expect(asset.reload).to be_uploaded
+      end
+
+      it "triggers the delete asset file worker" do
+        expect(DeleteAssetFileFromNfsJob).to receive(:perform_in)
+        asset.upload_success!
+      end
+    end
+
+    context "when asset is infected" do
+      let(:asset) { create(:infected_asset) }
+
+      it "does not allow asset state change to uploaded" do
+        expect { asset.upload_success! }
+          .to raise_error(StateMachines::InvalidTransition)
+      end
+    end
+
+    context "when asset is uploaded" do
+      let(:asset) { create(:uploaded_asset) }
+
+      it "does not allow asset state change to uploaded" do
+        expect { asset.upload_success! }
+          .to raise_error(StateMachines::InvalidTransition)
+      end
+    end
+  end
+
+  describe "#save" do
+    let(:asset) { create(:clean_asset) }
+
+    context "when asset has been uploaded to cloud storage" do
+      before do
+        asset.upload_success!
+      end
+
+      it "saves asset successfully despite having no file" do
+        expect(asset.save).to be_truthy
+      end
+    end
+
+    context "when the file name is unchanged" do
+      let(:saved_asset) { create(:asset) }
+      let(:md5_hexdigest) { saved_asset.md5_hexdigest }
+      let(:original_filename) { saved_asset.file.send(:original_filename) }
+
+      it "updates the md5 hexdigest" do
+        asset = described_class.find(saved_asset.id) # find to clear memoization
+        asset.update!(file: load_fixture_file("lorem.txt", named: original_filename))
+
+        expect(asset.md5_hexdigest).not_to eq md5_hexdigest
+      end
+    end
+  end
+
+  describe "#replaced_by" do
+    let(:asset) { FactoryBot.build(:asset, replaced_by:) }
+
+    context "when replaced_by is nil" do
+      let(:replaced_by) { nil }
+
+      it "is valid" do
+        expect(asset).to be_valid
+      end
+
+      it "has no replaced_by" do
+        expect(asset.replaced_by_id).to be_nil
+      end
+    end
+
+    context "when replaced_by is set" do
+      let(:replaced_by) { create(:asset) }
+
+      it "is valid" do
+        expect(asset).to be_valid
+      end
+
+      it "persists replaced_by when saved" do
+        asset.save!
+
+        expect(asset.reload.replaced_by).to eq(replaced_by)
+      end
+
+      it "persists replaced_by_id when saved" do
+        asset.save!
+
+        expect(asset.reload.replaced_by_id).to eq(replaced_by.id)
+      end
+    end
+  end
+
+  describe "#parent_document_url" do
+    let(:asset) { described_class.new }
+
+    it "is nil by default" do
+      expect(asset.parent_document_url).to be_nil
+    end
+
+    it "can be set" do
+      asset.parent_document_url = "parent-document-url"
+      expect(asset.parent_document_url).to eql("parent-document-url")
     end
   end
 end

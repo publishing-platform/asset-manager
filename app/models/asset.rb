@@ -69,8 +69,8 @@ class Asset < ApplicationRecord
     end
 
     after_transition to: :uploaded do |asset, _|
-      # asset.save!
-      # DeleteAssetFileFromNfsJob.perform_in(5.minutes, asset.id.to_s)
+      asset.save!
+      DeleteAssetFileFromNfsJob.perform_in(5.minutes, asset.id)
     end
   end
 
@@ -111,14 +111,6 @@ class Asset < ApplicationRecord
     %w[jpg jpeg png gif].include?(extension)
   end
 
-  def destroy
-    update!(deleted_at: Time.zone.now)
-  end
-
-  def restore
-    update!(deleted_at: nil)
-  end
-
   def etag_from_file
     sprintf("%<mtime>x-%<size>x", mtime: last_modified_from_file, size: file_stat.size) if file_exists?
   end
@@ -151,6 +143,18 @@ class Asset < ApplicationRecord
     Asset.where(replaced_by_id: id).find_each do |replaced_by_me|
       replaced_by_me.update(replaced_by:)
     end
+  end
+
+  def destroy
+    update!(deleted_at: Time.zone.now)
+  end
+
+  def restore
+    update!(deleted_at: nil)
+  end
+
+  def deleted?
+    deleted_at.present?
   end
 
 private
