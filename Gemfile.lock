@@ -78,6 +78,25 @@ GEM
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
+    aws-eventstream (1.4.0)
+    aws-partitions (1.1246.0)
+    aws-sdk-core (3.246.0)
+      aws-eventstream (~> 1, >= 1.3.0)
+      aws-partitions (~> 1, >= 1.992.0)
+      aws-sigv4 (~> 1.9)
+      base64
+      bigdecimal
+      jmespath (~> 1, >= 1.6.1)
+      logger
+    aws-sdk-kms (1.124.0)
+      aws-sdk-core (~> 3, >= 3.244.0)
+      aws-sigv4 (~> 1.5)
+    aws-sdk-s3 (1.221.0)
+      aws-sdk-core (~> 3, >= 3.244.0)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.5)
+    aws-sigv4 (1.12.1)
+      aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
     bigdecimal (4.1.2)
     bootsnap (1.24.3)
@@ -146,6 +165,7 @@ GEM
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    jmespath (1.6.2)
     json (2.19.5)
     jwt (3.1.2)
       base64
@@ -455,6 +475,8 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  aws-sdk-core
+  aws-sdk-s3
   bootsnap
   brakeman
   carrierwave (~> 3.0)
@@ -462,7 +484,7 @@ DEPENDENCIES
   factory_bot_rails
   pg (~> 1.1)
   publishing_platform_app_config
-  publishing_platform_location (= 0.4.3)
+  publishing_platform_location
   publishing_platform_rubocop
   publishing_platform_sidekiq
   publishing_platform_sso

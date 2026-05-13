@@ -2,6 +2,8 @@ source "https://rubygems.org"
 
 gem "rails", "~> 8.1.3"
 
+gem "aws-sdk-core"
+gem "aws-sdk-s3"
 gem "carrierwave", "~> 3.0"
 gem "pg", "~> 1.1"
 gem "publishing_platform_app_config"
