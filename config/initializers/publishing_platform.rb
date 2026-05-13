@@ -1,0 +1,3 @@
+require "publishing_platform_configuration"
+
+AssetManager.publishing_platform = PublishingPlatformConfiguration.new
