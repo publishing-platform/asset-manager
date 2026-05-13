@@ -251,7 +251,7 @@ GEM
       puma (>= 5.6, < 8.0)
       sentry-rails (>= 5.3, < 7.0)
       sentry-ruby (~> 5.3)
-    publishing_platform_location (0.4.2)
+    publishing_platform_location (0.4.3)
     publishing_platform_rubocop (0.3.2)
       rubocop (= 1.86.1)
       rubocop-ast (= 1.49.1)
@@ -462,7 +462,7 @@ DEPENDENCIES
   factory_bot_rails
   pg (~> 1.1)
   publishing_platform_app_config
-  publishing_platform_location
+  publishing_platform_location (= 0.4.3)
   publishing_platform_rubocop
   publishing_platform_sidekiq
   publishing_platform_sso
