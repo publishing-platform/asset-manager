@@ -13,6 +13,11 @@ RSpec.describe S3Storage::Fake do
     FileUtils.remove_entry(root_directory)
   end
 
+  it "implements all public methods defined on S3Storage" do
+    methods = S3Storage.public_instance_methods(false)
+    expect(described_class.public_instance_methods(false)).to include(*methods)
+  end
+
   context "when saving a file" do
     let(:asset_path) { root_path.join(relative_path_to_asset) }
 
