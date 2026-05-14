@@ -9,6 +9,7 @@ gem "pg", "~> 1.1"
 gem "publishing_platform_app_config"
 gem "publishing_platform_location"
 gem "publishing_platform_sidekiq"
+gem "publishing_platform_sso"
 gem "sidekiq-unique-jobs", "< 8.1.1"
 gem "state_machines-activerecord"
 gem "tzinfo-data", platforms: %i[windows jruby]
@@ -20,7 +21,6 @@ group :development, :test do
   gem "debug", platforms: %i[mri windows], require: "debug/prelude"
   gem "factory_bot_rails"
   gem "publishing_platform_rubocop"
-  gem "publishing_platform_sso"
   gem "rspec-rails"
   gem "webmock", require: false
 end
