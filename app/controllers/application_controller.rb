@@ -1,2 +1,33 @@
 class ApplicationController < ActionController::API
+  include PublishingPlatform::SSO::ControllerMethods
+
+  before_action :authenticate_user!
+
+  rescue_from ActiveRecord::RecordNotFound, with: :error_404
+  rescue_from MediaErrors::AssetNotFound, with: :error_404
+  rescue_from MediaErrors::AssetDeleted, with: :error_410
+
+private
+
+  def error_403
+    error 403, "Forbidden. You don't have permission to access this resource."
+  end
+
+  def error_404
+    error 404, "not found"
+  end
+
+  def error_410
+    error 410, "gone"
+  end
+
+  def error(code, message)
+    render json: { _response_info: { status: message } }, status: code
+  end
+
+  def set_default_expiry
+    unless Rails.env.development?
+      expires_in 30.minutes, public: true
+    end
+  end
 end

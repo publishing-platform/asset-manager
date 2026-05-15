@@ -2,15 +2,30 @@ class AssetsController < ApplicationController
   before_action :restrict_request_format
 
   def show
-    render json: { route: "show" }
+    @asset = find_asset(include_deleted: true)
+
+    expires_now
+    render json: AssetPresenter.new(@asset, self)
   end
 
   def create
-    render json: { route: "create" }
+    @asset = build_asset
+
+    if @asset.save
+      render json: AssetPresenter.new(@asset, self).as_json(status: :created), status: :created
+    else
+      error 422, @asset.errors.full_messages
+    end
   end
 
   def update
-    render json: { route: "update" }
+    @asset = Asset.undeleted.or(Asset.where(draft: true)).find(params[:id])
+
+    if @asset.update(asset_params)
+      render json: AssetPresenter.new(@asset, self).as_json(status: :success)
+    else
+      error 422, @asset.errors.full_messages
+    end
   end
 
   def destroy
@@ -25,5 +40,34 @@ private
 
   def restrict_request_format
     request.format = :json
+  end
+
+  def asset_params
+    params.require(:asset).tap { |asset|
+      if asset.key?(:redirect_url) && asset[:redirect_url].blank?
+        asset[:redirect_url] = nil
+      end
+
+      if asset.key?(:auth_bypass_ids) && asset[:auth_bypass_ids].empty?
+        asset[:auth_bypass_ids] = []
+      end
+    }.permit(
+      :file,
+      :draft,
+      :redirect_url,
+      :replaced_by_id,
+      :parent_document_url,
+      :content_type,
+      auth_bypass_ids: [],
+    )
+  end
+
+  def find_asset(include_deleted: false)
+    scope = include_deleted ? Asset : Asset.undeleted
+    scope.find(params[:id])
+  end
+
+  def build_asset
+    Asset.new(asset_params)
   end
 end

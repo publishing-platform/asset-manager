@@ -72,4 +72,8 @@ RSpec.configure do |config|
 
   config.include FileHelpers, type: :model
   config.include FileHelpers, type: :request
+
+  config.before(:each, type: :request) do
+    create(:user)
+  end
 end

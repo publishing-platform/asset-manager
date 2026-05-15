@@ -1,7 +1,7 @@
 class AssetPresenter
-  def initialize(asset, view_context)
+  def initialize(asset, context)
     @asset = asset
-    @view_context = view_context
+    @context = context
   end
 
   def as_json(options = {})
@@ -9,7 +9,7 @@ class AssetPresenter
       _response_info: {
         status: options[:status] || "ok",
       },
-      id: @view_context.asset_url(@asset.id),
+      id: @context.asset_url(@asset.id),
       name: @asset.filename,
       content_type: @asset.content_type || @asset.content_type_from_extension,
       size: @asset.size,
