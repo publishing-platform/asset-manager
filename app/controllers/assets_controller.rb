@@ -29,11 +29,15 @@ class AssetsController < ApplicationController
   end
 
   def destroy
-    render json: { route: "destroy" }
+    @asset = find_asset
+    @asset.destroy!
+    render json: AssetPresenter.new(@asset, self).as_json(status: :success)
   end
 
   def restore
-    render json: { route: "restore" }
+    @asset = find_asset(include_deleted: true)
+    @asset.restore
+    render json: AssetPresenter.new(@asset, self).as_json(status: :success)
   end
 
 private

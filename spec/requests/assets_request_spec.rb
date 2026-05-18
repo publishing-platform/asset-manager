@@ -313,6 +313,128 @@ RSpec.describe "/assets", type: :request do
         put asset_path(asset.id), params: { asset: attributes }
         expect(Asset.first.redirect_url).to be_nil
       end
+
+      it "stores replacement on existing asset" do
+        replaced_by = create(:asset)
+        replaced_by_id = replaced_by.id
+        attributes = valid_attributes.merge(replaced_by_id:)
+        put asset_path(asset.id), params: { asset: attributes }
+
+        expect(Asset.find(asset.id).replaced_by).to eq(replaced_by)
+      end
+
+      it "stores replaced_by_id as nil if replaced_by_id is blank" do
+        attributes = valid_attributes.merge(replaced_by_id: "")
+        put asset_path(asset.id), params: { asset: attributes }
+
+        expect(Asset.find(asset.id).replaced_by_id).to be_nil
+      end
+
+      it "responds with unprocessable entity status if replacement is not found" do
+        replaced_by_id = "non-existent-asset-id"
+        attributes = valid_attributes.merge(replaced_by_id:)
+        put asset_path(asset.id), params: { asset: attributes }
+
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+
+      it "includes error message in response if replacement is not found" do
+        replaced_by_id = "non-existent-asset-id"
+        attributes = valid_attributes.merge(replaced_by_id:)
+        put asset_path(asset.id), params: { asset: attributes }
+
+        body = JSON.parse(response.body)
+        status = body["_response_info"]["status"]
+        expect(status).to include("Replaced by not found")
+      end
+
+      context "when attributes include draft status" do
+        let(:attributes) { valid_attributes.merge(draft: true) }
+
+        it "stores draft status on existing asset" do
+          put asset_path(asset.id), params: { asset: attributes }
+
+          expect(Asset.first).to be_draft
+        end
+
+        it "includes the draft status in the response" do
+          put asset_path(asset.id), params: { asset: attributes }
+
+          body = JSON.parse(response.body)
+
+          expect(body["draft"]).to be_truthy
+        end
+
+        it "changes draft state for draft deleted asset" do
+          asset.update!(deleted_at: 1.hour.ago, draft: true)
+
+          put asset_path(asset.id), params: { asset: attributes.merge(draft: false) }
+
+          expect(asset.reload).not_to be_draft
+        end
+
+        it "preserves draft state for live deleted asset" do
+          asset.update!(deleted_at: 1.hour.ago, draft: false)
+
+          put asset_path(asset.id), params: { asset: attributes.merge(draft: true) }
+
+          expect(asset.reload).not_to be_draft
+        end
+      end
+    end
+  end
+
+  describe "DELETE /destroy" do
+    let(:asset) { create(:uploaded_asset) }
+
+    it "soft deletes an existing asset" do
+      delete asset_path(asset.id)
+      body = JSON.parse(response.body)
+
+      expect(response).to have_http_status(:success)
+      expect(body["_response_info"]["status"]).to eq("success")
+      expect(body["id"]).to eq("http://www.example.com/assets/#{asset.id}")
+      expect(body["name"]).to eq("asset.png")
+      expect(body["content_type"]).to eq("image/png")
+      expect(body["file_url"]).to eq("http://assets.dev.publishing-platform.co.uk/media/#{asset.id}/asset.png")
+      expect(body["state"]).to eq("uploaded")
+      expect(body["deleted"]).to be(true)
+
+      expect(Asset.find(asset.id).deleted_at).not_to be_nil
+    end
+
+    it "responds with a success status" do
+      delete asset_path(asset.id)
+
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  describe "POST /restore" do
+    let(:asset) { create(:deleted_asset) }
+
+    it "restores a soft deleted asset" do
+      post restore_asset_path(asset.id)
+
+      body = JSON.parse(response.body)
+
+      expect(response).to have_http_status(:success)
+      expect(body["_response_info"]["status"]).to eq("success")
+      expect(body["id"]).to eq("http://www.example.com/assets/#{asset.id}")
+      expect(body["name"]).to eq("asset.png")
+      expect(body["content_type"]).to eq("image/png")
+      expect(body["file_url"]).to eq("http://assets.dev.publishing-platform.co.uk/media/#{asset.id}/asset.png")
+      expect(body["state"]).to eq("unscanned")
+      expect(body["deleted"]).to be(false)
+
+      restored_asset = Asset.first
+      expect(restored_asset).not_to be_nil
+      expect(restored_asset.deleted_at).to be_nil
+    end
+
+    it "responds with success status" do
+      post restore_asset_path(asset.id)
+      expect(response).to be_successful
     end
   end
 end
