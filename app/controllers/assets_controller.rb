@@ -5,14 +5,14 @@ class AssetsController < ApplicationController
     @asset = find_asset(include_deleted: true)
 
     expires_now
-    render json: AssetPresenter.new(@asset, self)
+    render json: AssetPresenter.new(@asset, view_context)
   end
 
   def create
     @asset = build_asset
 
     if @asset.save
-      render json: AssetPresenter.new(@asset, self).as_json(status: :created), status: :created
+      render json: AssetPresenter.new(@asset, view_context).as_json(status: :created), status: :created
     else
       error 422, @asset.errors.full_messages
     end
@@ -22,7 +22,7 @@ class AssetsController < ApplicationController
     @asset = Asset.undeleted.or(Asset.where(draft: true)).find(params[:id])
 
     if @asset.update(asset_params)
-      render json: AssetPresenter.new(@asset, self).as_json(status: :success)
+      render json: AssetPresenter.new(@asset, view_context).as_json(status: :success)
     else
       error 422, @asset.errors.full_messages
     end
@@ -31,13 +31,13 @@ class AssetsController < ApplicationController
   def destroy
     @asset = find_asset
     @asset.destroy!
-    render json: AssetPresenter.new(@asset, self).as_json(status: :success)
+    render json: AssetPresenter.new(@asset, view_context).as_json(status: :success)
   end
 
   def restore
     @asset = find_asset(include_deleted: true)
     @asset.restore
-    render json: AssetPresenter.new(@asset, self).as_json(status: :success)
+    render json: AssetPresenter.new(@asset, view_context).as_json(status: :success)
   end
 
 private

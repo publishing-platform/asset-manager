@@ -18,6 +18,8 @@ Rails.application.configure do
   # Enable/disable Action Controller caching. By default Action Controller caching is disabled.
   # Run rails dev:cache to toggle Action Controller caching.
   if Rails.root.join("tmp/caching-dev.txt").exist?
+    config.action_controller.perform_caching = true
+    config.action_controller.enable_fragment_cache_logging = true
     config.public_file_server.headers = { "cache-control" => "public, max-age=#{2.days.to_i}" }
   else
     config.action_controller.perform_caching = false
@@ -64,4 +66,6 @@ Rails.application.configure do
 
   # Allow requests for all domains e.g. <app>.dev.publishing-platform.co.uk
   config.hosts.clear
+
+  credentials.jwt_auth_secret = ENV.fetch("JWT_AUTH_SECRET", "secret")
 end

@@ -489,6 +489,7 @@ DEPENDENCIES
   climate_control
   debug
   factory_bot_rails
+  jwt
   pg (~> 1.1)
   publishing_platform_app_config
   publishing_platform_location
