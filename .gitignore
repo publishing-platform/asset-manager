@@ -27,3 +27,6 @@
 # Simplecov
 coverage/*
 test/reports/*
+
+fake-s3/*
+uploads/*
