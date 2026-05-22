@@ -1,74 +1,81 @@
-# syntax=docker/dockerfile:1
-# check=error=true
+ARG ruby_version=3.4
+ARG clam_version=1.5.2
+ARG base_image=ghcr.io/publishing-platform/publishing-platform-ruby-base:$ruby_version
+ARG builder_image=ghcr.io/publishing-platform/publishing-platform-ruby-builder:$ruby_version
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t asset_manager .
-# docker run -d -p 80:3000 -e RAILS_MASTER_KEY=<value from config/master.key> --name asset_manager asset_manager
+FROM $builder_image AS clam_builder
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
+ARG clam_version
+ARG clam_url_prefix=https://github.com/Cisco-Talos/clamav/releases/download
+ARG clam_url=$clam_url_prefix/clamav-${clam_version}/clamav-${clam_version}.tar.gz
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=3.4.8
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+WORKDIR /src
+RUN curl -SLfso - "$clam_url" | tar -zxf - --strip-components=1
 
-# Rails app lives here
-WORKDIR /rails
+WORKDIR /src/build
 
-# Install base packages
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 postgresql-client && \
-    ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+# install required tools and clamav dependencies
+RUN install_packages \
+      gcc make pkg-config python3 python3-pip python3-pytest valgrind cmake curl sudo \
+      check libbz2-dev libcurl4-openssl-dev libjson-c-dev libmilter-dev \
+      libncurses5-dev libpcre2-dev libssl-dev libxml2-dev zlib1g-dev
 
-# Set production environment variables and enable jemalloc for reduced memory usage and latency.
-ENV RAILS_ENV="production" \
-    BUNDLE_DEPLOYMENT="1" \
-    BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development" \
-    LD_PRELOAD="/usr/local/lib/libjemalloc.so"
 
-# Throw-away build stage to reduce size of final image
-FROM base AS build
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+      && \
+      . $HOME/.cargo/env \
+      && \
+      rustup update \
+      && \
+      cmake .. \
+        -D CLAMAV_USER=app \
+        -D CLAMAV_GROUP=app \
+        -D CMAKE_BUILD_TYPE="Release" \
+        -D DATABASE_DIRECTORY="/var/lib/clamav" \
+        -D ENABLE_CLAMONACC=OFF \
+        -D ENABLE_JSON_SHARED=OFF \
+        -D ENABLE_MAN_PAGES=OFF \
+        -D ENABLE_MILTER=OFF
 
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+RUN make DESTDIR=/clamav -j$(nproc) install
 
-# Install application gems
-COPY vendor/* ./vendor/
-COPY Gemfile Gemfile.lock ./
 
-RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
-    bundle exec bootsnap precompile -j 1 --gemfile
+FROM $builder_image AS app_builder
 
-# Copy application code
+WORKDIR $APP_HOME
+COPY Gemfile* .ruby-version ./
+RUN bundle install
 COPY . .
-
-# Precompile bootsnap code for faster boot times.
-# -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
-RUN bundle exec bootsnap precompile -j 1 app/ lib/
+RUN bootsnap precompile --gemfile .
 
 
+FROM $base_image
 
+ENV PUBLISHING_PLATFORM_APP_NAME=asset-manager
 
-# Final stage for app image
-FROM base
+# install clamav dependencies
+RUN install_packages \
+      check libbz2-dev libcurl4-openssl-dev libjson-c-dev libmilter-dev \
+      libncurses5-dev libpcre2-dev libssl-dev libxml2-dev zlib1g-dev
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-USER 1000:1000
+# create directory for database
+RUN mkdir -p /var/lib/clamav ; \
+    chown app:app /var/lib/clamav
 
-# Copy built artifacts: gems, application
-COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
-COPY --chown=rails:rails --from=build /rails /rails
+COPY --from=clam_builder /clamav /
 
-# Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+# Crude smoke test and print library versions.
+RUN echo -n clamd:\ ; clamd --version -c /dev/null ; \
+    ldd $(which clamd) ; \
+    echo -n clamdscan:\ ; clamdscan --version -c /dev/null ; \
+    ldd $(which clamdscan)
 
-# Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
-CMD ["./bin/rails", "server"]
+WORKDIR $APP_HOME
+COPY --from=builder $BUNDLE_PATH $BUNDLE_PATH
+COPY --from=builder $BOOTSNAP_CACHE_DIR $BOOTSNAP_CACHE_DIR
+COPY --from=builder $APP_HOME .
+
+USER app
+CMD ["puma"]
+
