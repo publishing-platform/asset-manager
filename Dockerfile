@@ -72,9 +72,9 @@ RUN echo -n clamd:\ ; clamd --version -c /dev/null ; \
     ldd $(which clamdscan)
 
 WORKDIR $APP_HOME
-COPY --from=builder $BUNDLE_PATH $BUNDLE_PATH
-COPY --from=builder $BOOTSNAP_CACHE_DIR $BOOTSNAP_CACHE_DIR
-COPY --from=builder $APP_HOME .
+COPY --from=app_builder $BUNDLE_PATH $BUNDLE_PATH
+COPY --from=app_builder $BOOTSNAP_CACHE_DIR $BOOTSNAP_CACHE_DIR
+COPY --from=app_builder $APP_HOME .
 
 USER app
 CMD ["puma"]
