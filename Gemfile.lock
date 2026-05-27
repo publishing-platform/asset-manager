@@ -280,7 +280,7 @@ GEM
       rubocop-rails (= 2.34.3)
       rubocop-rake (= 0.7.1)
       rubocop-rspec (= 3.9.0)
-    publishing_platform_sidekiq (0.6.2)
+    publishing_platform_sidekiq (0.6.3)
       publishing_platform_api_adapters (~> 0.10)
       redis-client (>= 0.22.2)
       sidekiq (~> 7.0, < 8)
