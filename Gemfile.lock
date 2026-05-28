@@ -268,7 +268,7 @@ GEM
       null_logger
       publishing_platform_location (~> 0.3)
       rest-client (~> 2.0)
-    publishing_platform_app_config (0.5.0)
+    publishing_platform_app_config (0.5.1)
       puma (>= 5.6, < 8.0)
       sentry-rails (>= 5.3, < 7.0)
       sentry-ruby (~> 5.3)
@@ -292,7 +292,7 @@ GEM
       rails (>= 7)
       warden (~> 1.2)
       warden-oauth2 (~> 0.0.1)
-    puma (7.2.0)
+    puma (7.2.1)
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.2.6)
@@ -467,7 +467,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    zeitwerk (2.7.5)
+    zeitwerk (2.8.2)
 
 PLATFORMS
   aarch64-linux
