@@ -262,7 +262,7 @@ GEM
       date
       stringio
     public_suffix (7.0.5)
-    publishing_platform_api_adapters (0.14.2)
+    publishing_platform_api_adapters (0.14.3)
       addressable (~> 2.8)
       link_header
       null_logger
@@ -280,7 +280,7 @@ GEM
       rubocop-rails (= 2.35.3)
       rubocop-rake (= 0.7.1)
       rubocop-rspec (= 3.9.0)
-    publishing_platform_sidekiq (0.6.3)
+    publishing_platform_sidekiq (0.6.4)
       publishing_platform_api_adapters (~> 0.10)
       redis-client (>= 0.22.2)
       sidekiq (~> 7.0, < 8)
