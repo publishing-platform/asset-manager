@@ -276,7 +276,7 @@ GEM
       sentry-rails (>= 5.3, < 7.0)
       sentry-ruby (~> 5.3)
     publishing_platform_location (0.4.5)
-    publishing_platform_rubocop (0.3.5)
+    publishing_platform_rubocop (0.3.6)
       rubocop (= 1.86.2)
       rubocop-ast (= 1.49.1)
       rubocop-capybara (= 2.23.0)
