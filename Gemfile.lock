@@ -171,7 +171,7 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jmespath (1.6.2)
-    json (2.20.0)
+    json (2.21.1)
     jwt (3.2.0)
       base64
     language_server-protocol (3.17.0.5)
@@ -271,7 +271,7 @@ GEM
       null_logger
       publishing_platform_location (~> 0.3)
       rest-client (~> 2.0)
-    publishing_platform_app_config (0.5.2)
+    publishing_platform_app_config (0.5.3)
       puma (>= 5.6, < 8.0)
       sentry-rails (>= 5.3, < 7.0)
       sentry-ruby (~> 5.3)
