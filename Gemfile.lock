@@ -170,7 +170,7 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jmespath (1.6.2)
-    json (2.21.1)
+    json (2.21.2)
     jwt (3.2.0)
       base64
     language_server-protocol (3.17.0.6)
@@ -275,7 +275,7 @@ GEM
       sentry-rails (>= 5.3, < 7.0)
       sentry-ruby (~> 5.3)
     publishing_platform_location (0.4.8)
-    publishing_platform_rubocop (0.3.11)
+    publishing_platform_rubocop (0.3.13)
       rubocop (= 1.88.2)
       rubocop-ast (= 1.50.0)
       rubocop-capybara (= 2.23.0)
