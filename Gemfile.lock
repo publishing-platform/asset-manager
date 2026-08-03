@@ -264,7 +264,7 @@ GEM
     prettyprint (0.2.0)
     prism (1.9.0)
     public_suffix (7.0.5)
-    publishing_platform_api_adapters (0.14.7)
+    publishing_platform_api_adapters (0.14.9)
       addressable (~> 2.8)
       link_header
       null_logger
@@ -282,7 +282,7 @@ GEM
       rubocop-rails (= 2.36.0)
       rubocop-rake (= 0.7.1)
       rubocop-rspec (= 3.10.2)
-    publishing_platform_sidekiq (0.6.7)
+    publishing_platform_sidekiq (0.6.9)
       publishing_platform_api_adapters (~> 0.10)
       redis-client (>= 0.22.2)
       sidekiq (~> 7.0, < 8)
